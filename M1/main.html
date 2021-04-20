@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel = "stylesheet" types="text/css" href = "mainStyle.css"<>
+  <script type="text/javascript" src="mainScript.js"></script>
+  <title>Big Red Car Keyboard</title>
+
+</head>
+
+<div class="keyboard">
+
+  <input type="text" id="keyboard-display" class = "keyboard-display" value="bigredcar" disabled />
+
+  <div class="keys">
+
+    <button onclick = "ab_pressed()" type="button" class="letter2" value="ab">ab</button>
+    <button onclick = "cd_pressed()" type="button" class="letter2" value="cd">cd</button>
+    <button onclick = "efg_pressed()" type="button" class="letter3" value="efg">efg</button>
+    <button onclick = "back_pressed()" type="button" class="special" value="back">back</button>
+
+    <button onclick = "h_pressed()" type="button" class="letter1" value="h">h</button>
+    <button onclick = "ijk_pressed()" type="button" class="letter3" value="ijk">ijk</button>
+    <button onclick = "lm_pressed()" type="button" class="letter2" value="lm">lm</button>
+    <button onclick = "repeat_pressed()" type="button" class="special" value="repeat">repeat</button>
+    
+    <button onclick = "n_pressed()" type="button" class="letter1" value="n">n</button>
+    <button onclick = "o_pressed()" type="button" class="letter1" value="o">o</button>
+    <button onclick = "pq_pressed()" type="button" class="letter2" value="pq">pq</button>
+    <button onclick = "r_pressed()" type="button" class="letter1" value="r">r</button>
+    
+    <button onclick = "s_pressed()" type="button" class="letter1" value="s">s</button>
+    <button onclick = "t_pressed()" type="button" class="letter1" value="t">t</button>
+    <button onclick = "uvw_pressed()" type="button" class="letter3" value="uvw">uvw</button>
+    <button onclick = "xyz_pressed()" type="button" class="letter3" value="xyz">xyz</button>
+
+  </div>
+
+  <button onclick = "space_pressed()" type="button" class="space" value="space">space</button>
+</div>
+
+
+
+
+
+<script>
+
+var output_str = "";
+var click_count = 0;
+var current_button = "";
+var previous = "";
+
+function updateDisplay() {
+  document.getElementById("keyboard-display").value = output_str;
+}
+
+function ab_pressed() {
+	if(current_button != "ab"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("a");
+		click_count += 1;
+		current_button = "ab";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("b");
+		click_count = 0;
+		current_button = "ab";
+	}
+	updateDisplay();
+}
+
+function cd_pressed() {
+	if(current_button != "cd"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("c");
+		click_count += 1;
+		current_button = "cd";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("d");
+		click_count = 0;
+		current_button = "cd";
+	}
+	updateDisplay();
+}
+
+function efg_pressed() {
+	if(current_button != "efg"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("e");
+		click_count += 1;
+		current_button = "efg";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("f");
+		click_count += 1;
+		current_button = "efg";
+	}
+	else if(click_count == 2){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("g");
+		click_count = 0;
+		current_button = "efg";
+	}
+	updateDisplay();
+}
+
+function back_pressed() {
+	output_str = output_str.slice(0,-1);
+	updateDisplay();
+}
+
+
+function h_pressed() {
+	if(current_button != "h"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("h");
+		click_count = 0;
+		current_button = "h";
+	updateDisplay();
+	}
+}
+
+function ijk_pressed() {
+	if(current_button != "ijk"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("i");
+		click_count += 1;
+		current_button = "ijk";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("j");
+		click_count += 1;
+		current_button = "ijk";
+	}
+	else if(click_count == 2){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("k");
+		click_count = 0;
+		current_button = "ijk";
+	}
+	updateDisplay();
+}
+
+function lm_pressed() {
+	if(current_button != "lm"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("l");
+		click_count += 1;
+		current_button = "lm";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("m");
+		click_count = 0;
+		current_button = "lm";
+	}
+	updateDisplay();
+}
+
+function repeat_pressed(){
+	previous = output_str.slice(-1);
+	output_str = output_str.concat(previous);
+	updateDisplay();
+}
+
+function n_pressed() {
+	if(current_button != "n"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("n");
+		click_count = 0;
+		current_button = "n";
+	updateDisplay();
+	}
+}
+
+function o_pressed() {
+	if(current_button != "o"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("o");
+		click_count = 0;
+		current_button = "o";
+	updateDisplay();
+	}
+}
+
+function pq_pressed() {
+	if(current_button != "pq"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("p");
+		click_count += 1;
+		current_button = "pq";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("q");
+		click_count = 0;
+		current_button = "pq";
+	}
+	updateDisplay();
+}
+
+function r_pressed() {
+	if(current_button != "r"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("r");
+		click_count = 0;
+		current_button = "r";
+	updateDisplay();
+	}
+}
+
+function s_pressed() {
+	if(current_button != "s"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("s");
+		click_count = 0;
+		current_button = "s";
+	updateDisplay();
+	}
+}
+
+function t_pressed() {
+	if(current_button != "t"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("t");
+		click_count = 0;
+		current_button = "t";
+	updateDisplay();
+	}
+}
+
+function uvw_pressed() {
+	if(current_button != "uvw"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("u");
+		click_count += 1;
+		current_button = "uvw";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("v");
+		click_count += 1;
+		current_button = "uvw";
+	}
+	else if(click_count == 2){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("w");
+		click_count = 0;
+		current_button = "uvw";
+	}
+	updateDisplay();
+}
+
+function xyz_pressed() {
+	if(current_button != "xyz"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("x");
+		click_count += 1;
+		current_button = "xyz";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("y");
+		click_count += 1;
+		current_button = "xyz";
+	}
+	else if(click_count == 2){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("z");
+		click_count = 0;
+		current_button = "xyz";
+	}
+	updateDisplay();
+}
+
+function space_pressed() {
+	output_str = output_str.concat(" ");
+	updateDisplay();
+}
+
+</script>
+
+
+</html>
