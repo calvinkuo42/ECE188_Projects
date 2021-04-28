@@ -361,8 +361,14 @@ function lm_pressed() {
 }
 
 function repeat_pressed(){
-	previous = output_str.slice(-1);
-	output_str = output_str.concat(previous);
+	if(output_str.length == emojiRecord[emojiRecord.length-1]){
+		
+	}
+	else{
+		previous = output_str.slice(-1);
+		output_str = output_str.concat(previous);
+	}
+	
 	updateDisplay();
 }
 
