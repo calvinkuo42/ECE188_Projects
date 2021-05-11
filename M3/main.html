@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<head>
+  <link rel = "stylesheet" types="text/css" href = "mainStyle.css"<>
+  <title>Big Red Car Gestures</title>
+</head>
+
+
+
+
+<div id='webcam-container'></div>
+<div id='label-container'></div>
+
+</head>
+
+<div class="keyboard">
+
+  <input type="text" id="keyboard-display" class = "keyboard-display" value="bigredcar" disabled />
+
+  <div class="keys">
+
+    <button onclick = "ab_pressed()" type="button" class="letter2" value="ab">ab</button>
+    <button onclick = "cd_pressed()" type="button" class="letter2" value="cd">cd</button>
+    <button onclick = "efg_pressed()" type="button" class="letter3" value="efg">efg</button>
+    <button onclick = "back_pressed()" type="button" class="special" value="back">back</button>
+
+    <button onclick = "h_pressed()" type="button" class="letter1" value="h">h</button>
+    <button onclick = "ijk_pressed()" type="button" class="letter3" value="ijk">ijk</button>
+    <button onclick = "lm_pressed()" type="button" class="letter2" value="lm">lm</button>
+    <button onclick = "repeat_pressed()" type="button" class="special" value="repeat">repeat</button>
+    
+    <button onclick = "n_pressed()" type="button" class="letter1" value="n">n</button>
+    <button onclick = "o_pressed()" type="button" class="letter1" value="o">o</button>
+    <button onclick = "pq_pressed()" type="button" class="letter2" value="pq">pq</button>
+    <button onclick = "r_pressed()" type="button" class="letter1" value="r">r</button>
+    
+    <button onclick = "s_pressed()" type="button" class="letter1" value="s">s</button>
+    <button onclick = "t_pressed()" type="button" class="letter1" value="t">t</button>
+    <button onclick = "uvw_pressed()" type="button" class="letter3" value="uvw">uvw</button>
+    <button onclick = "xyz_pressed()" type="button" class="letter3" value="xyz">xyz</button>
+
+  </div>
+
+  <div class = "special_keys">
+  	<button id="startButton" onclick="init()" class = "startButton" type="startButton">S</button>
+  	<button id="stopButton" onclick="stopCam()" class = "stopButton" type="stopButton"></button>
+    <button onclick = "space_pressed()" type="button" class="space" value="space">space</button>
+    <canvas id="myPics" width="64" height="42"></canvas>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.3/dist/teachablemachine-image.min.js"></script>
+<script>
+   
+	const URL = 'https://teachablemachine.withgoogle.com/models/PqY8MNHHW/'
+
+	let model, webcam, labelContainer, maxPredictions;
+
+    // Load the image model and setup the webcam
+	async function init() {
+
+
+		document.getElementById("webcam-container").style.display = "none";
+		document.getElementById("label-container").style.display = "none";
+		document.getElementById("stopButton").innerHTML = "S";
+		document.getElementById("startButton").innerHTML = "";
+
+        const modelURL = URL + 'model.json';
+        const metadataURL = URL + 'metadata.json';
+
+        // load the model and metadata
+        // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
+        // or files from your local hard drive
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        // Convenience function to setup a webcam
+        const flip = true; // whether to flip the webcam
+        webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+        await webcam.setup(); // request access to the webcam
+        webcam.play();
+        window.requestAnimationFrame(loop);
+
+
+        // append elements to the DOM
+        document.getElementById('webcam-container').appendChild(webcam.canvas);
+        labelContainer = document.getElementById('label-container');
+        for (let i = 0; i < maxPredictions; i++) { // and class labels
+            labelContainer.appendChild(document.createElement('div'));
+        }
+        
+    }
+
+    async function loop() {
+
+
+	    webcam.update(); // update the webcam frame
+	    await predict();
+	    window.requestAnimationFrame(loop);
+
+	    
+    }
+
+
+    // run the webcam image through the image model
+    async function predict() {
+
+
+    	
+
+        // predict can take in an image, video or canvas html element
+        const prediction = await model.predict(webcam.canvas);
+        for (let i = 0; i < maxPredictions; i++) {
+            const classPrediction =
+                prediction[i].className + ': ' + prediction[i].probability.toFixed(2);
+            labelContainer.childNodes[i].innerHTML = classPrediction;
+
+        }
+
+        if(prediction[0].probability > 0.98){
+        	currentEmoji = "happy";
+        }
+        else if(prediction[1].probability > 0.98){
+        	currentEmoji = "sad";
+        }
+        else if(prediction[2].probability > 0.90){
+        	currentEmoji = "straight";	
+        }
+        else if(prediction[3].probability > 0.995){
+        	currentEmoji = "thumb";
+        }
+        else if(prediction[4].probability > 0.98){
+        	currentEmoji = "wave";
+        }
+        else if(prediction[5].probability > 0.98){
+        	currentEmoji = "idle";
+        }
+
+        handleCamEmoji();
+
+
+    }
+
+    function stopCam(){
+	   	document.getElementById("stopButton").innerHTML = "";
+    	document.getElementById("startButton").innerHTML = "S";
+
+    }
+
+
+//model link: https://teachablemachine.withgoogle.com/models/PqY8MNHHW/
+
+
+//HANDLE PRINTING EMOJI FROM CAMERA INPUT
+var prevEmoji = "nothing yet";
+var currentEmoji = "nothing";
+
+
+function handleCamEmoji(){
+	click_count = 0;
+	if(currentEmoji == "happy" && prevEmoji !== "happy"){
+		output_str = output_str.concat(String.fromCodePoint(0x1F60A));
+		prevEmoji = "happy";
+		emojiRecord = emojiRecord.concat(output_str.length);
+	}
+	else if(currentEmoji == "sad" && prevEmoji !== "sad"){
+		output_str = output_str.concat(String.fromCodePoint(0x1F615));
+		prevEmoji = "sad";
+		emojiRecord = emojiRecord.concat(output_str.length);
+	}
+	else if(currentEmoji == "straight" && prevEmoji !== "straight"){
+		output_str = output_str.concat(String.fromCodePoint(0x1F610));
+		prevEmoji = "straight";
+		emojiRecord = emojiRecord.concat(output_str.length);
+	}
+	else if(currentEmoji == "thumb" && prevEmoji !== "thumb"){
+		output_str = output_str.concat(String.fromCodePoint(0x1F44D));
+		prevEmoji = "thumb";
+		emojiRecord = emojiRecord.concat(output_str.length);
+		console.log("thumb should be printed");
+
+	}
+	else if(currentEmoji == "wave" && prevEmoji !== "wave"){
+		output_str = output_str.concat(String.fromCodePoint(0x1F44B));
+		prevEmoji = "wave";
+		emojiRecord = emojiRecord.concat(output_str.length);
+	}
+	else if(currentEmoji == "idle"){
+		//do nothing
+	}
+	else{
+		//do nothing
+	}
+
+	updateDisplay();
+}
+
+
+//reference for drawing: https://developer.mozilla.org/en-US/docs/Web/API/Element/mousemove_event
+var output_str = "";
+var click_count = 0;
+
+
+
+//save information about current gesture
+var initialX = -1;
+var initialY = -1;
+var finalX = -1;
+var finalY = -1;
+
+var bottomLineCrossed = 0;
+var topLineCrossed = 0;
+var midLineCrossed = 0;
+
+var prevX = 0;
+var prevY = 0;
+
+var threshold = 2;
+
+var emoji = "nothing yet";
+
+var emojiRecord = [];
+//process the gesture inputted
+function processGesture(){
+
+	if(initialY>31 && finalY<10 && midLineCrossed == 1){
+		emoji = "smirk";
+		console.log("smirk detected");
+	}
+	else if(initialY < 31 && finalY < 31 && bottomLineCrossed == 2){
+		emoji = "happy";
+	}
+	else if(initialY > 31 && finalY > 31 && bottomLineCrossed == 2){
+		emoji = "sad";
+	}
+	else if(initialY > 10 && finalY > 10 && topLineCrossed == 2){
+		emoji = "upside_down";
+	}
+	else if(initialY > 10 && initialY < 31 && finalY > 10 && finalY < 31 && topLineCrossed == 0 && bottomLineCrossed == 0){
+		emoji = "straight";
+	}
+
+	printEmoji();
+
+	if(emoji != "nothing yet"){
+		emojiRecord = emojiRecord.concat(output_str.length);
+		console.log("emoji should be printed");
+	}
+	
+	//console.log(emojiRecord);
+
+	//console.log(emoji);
+	//console.log(emoji);
+	//console.log(midLineCrossed);
+	//console.log(initialY);
+	//console.log(finalY);
+
+	resetInfo();
+
+}
+
+function printEmoji(){
+	click_count = 0;
+	if(emoji == "smirk"){
+		output_str = output_str.concat(String.fromCodePoint(0x1F60F));
+	}
+	else if(emoji == "happy"){
+		output_str = output_str.concat(String.fromCodePoint(0x1F60A));
+	}
+	else if(emoji == "sad"){
+		output_str = output_str.concat(String.fromCodePoint(0x1F615));
+	}
+	else if(emoji == "upside_down"){
+		output_str = output_str.concat(String.fromCodePoint(0x1F643));
+	}
+	else if(emoji == "straight"){
+		output_str = output_str.concat(String.fromCodePoint(0x1F610));
+	}
+
+	updateDisplay();
+
+}
+
+function resetInfo(){
+	initialX = -1;
+	initialY = -1;
+	finalX = -1;
+	finalY = -1;
+
+	bottomLineCrossed = 0;
+	topLineCrossed = 0;
+	midLineCrossed = 0;
+
+	prevX = 0;
+	prevY = 0;
+
+	emoji = "nothing yet";
+}
+
+// When true, moving the mouse draws on the canvas
+let isDrawing = false;
+let x = 0;
+let y = 0;
+
+const myPics = document.getElementById('myPics');
+const context = myPics.getContext('2d');
+
+// event.offsetX, event.offsetY gives the (x,y) offset from the edge of the canvas.
+
+// Add the event listeners for mousedown, mousemove, and mouseup
+myPics.addEventListener('mousedown', e => {
+  x = e.offsetX;
+  y = e.offsetY;
+  isDrawing = true;
+
+  initialX = x;
+  initialY = y;
+
+});
+ 
+var writing=0;
+
+myPics.addEventListener('mousemove', e => {
+  if (isDrawing === true) {
+    drawLine(context, x, y, e.offsetX, e.offsetY);
+    x = e.offsetX;
+    y = e.offsetY;
+
+    if(y==31 && prevY != 31){
+    	bottomLineCrossed += 1;
+    }
+    if(y==10 && prevY != 10){
+    	topLineCrossed += 1;
+    }
+    if(x==32 && prevX != 32){
+    	midLineCrossed += 1;
+    }
+
+    writing = 1;
+
+    console.log();
+
+    prevX = x;
+    prevY = y;
+  }
+});
+
+window.addEventListener('mouseup', e => {
+  if (isDrawing === true) {
+    drawLine(context, x, y, e.offsetX, e.offsetY);
+    x = 0;
+    y = 0;
+    isDrawing = false;
+
+    finalX = e.offsetX;
+    finalY = e.offsetY;
+
+    context.clearRect(0,0,myPics.width,myPics.height); //clear after drawing
+    processGesture();
+  }
+});
+
+function drawLine(context, x1, y1, x2, y2) {
+  context.beginPath();
+  context.strokeStyle = 'black';
+  context.lineWidth = 1;
+  context.moveTo(x1, y1);
+  context.lineTo(x2, y2);
+  context.stroke();
+  context.closePath();
+}
+
+
+
+
+
+
+var current_button = "";
+var previous = "";
+
+function updateDisplay() {
+  document.getElementById("keyboard-display").value = output_str;
+  //console.log(output_str.length);
+}
+
+function ab_pressed() {
+	if(current_button != "ab"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("a");
+		click_count += 1;
+		current_button = "ab";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("b");
+		click_count = 0;
+		current_button = "ab";
+	}
+	updateDisplay();
+}
+
+function cd_pressed() {
+	if(current_button != "cd"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("c");
+		click_count += 1;
+		current_button = "cd";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("d");
+		click_count = 0;
+		current_button = "cd";
+	}
+	updateDisplay();
+}
+
+function efg_pressed() {
+	if(current_button != "efg"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("e");
+		click_count += 1;
+		current_button = "efg";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("f");
+		click_count += 1;
+		current_button = "efg";
+	}
+	else if(click_count == 2){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("g");
+		click_count = 0;
+		current_button = "efg";
+	}
+	updateDisplay();
+}
+
+function back_pressed() {
+	if(output_str.length == emojiRecord[emojiRecord.length-1]){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.slice(0,-1);
+		emojiRecord = emojiRecord.slice(0,-1);
+	}
+	else{
+		output_str = output_str.slice(0,-1);
+	}
+	
+
+	updateDisplay();
+
+}
+
+
+function h_pressed() {
+	if(current_button != "h"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("h");
+		click_count = 0;
+		current_button = "h";
+	updateDisplay();
+	}
+}
+
+function ijk_pressed() {
+	if(current_button != "ijk"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("i");
+		click_count += 1;
+		current_button = "ijk";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("j");
+		click_count += 1;
+		current_button = "ijk";
+	}
+	else if(click_count == 2){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("k");
+		click_count = 0;
+		current_button = "ijk";
+	}
+	updateDisplay();
+}
+
+function lm_pressed() {
+	if(current_button != "lm"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("l");
+		click_count += 1;
+		current_button = "lm";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("m");
+		click_count = 0;
+		current_button = "lm";
+	}
+	updateDisplay();
+}
+
+function repeat_pressed(){
+	if(output_str.length == emojiRecord[emojiRecord.length-1]){
+		
+	}
+	else{
+		previous = output_str.slice(-1);
+		output_str = output_str.concat(previous);
+	}
+	
+	updateDisplay();
+}
+
+function n_pressed() {
+	if(current_button != "n"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("n");
+		click_count = 0;
+		current_button = "n";
+	updateDisplay();
+	}
+}
+
+function o_pressed() {
+	if(current_button != "o"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("o");
+		click_count = 0;
+		current_button = "o";
+	updateDisplay();
+	}
+}
+
+function pq_pressed() {
+	if(current_button != "pq"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("p");
+		click_count += 1;
+		current_button = "pq";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("q");
+		click_count = 0;
+		current_button = "pq";
+	}
+	updateDisplay();
+}
+
+function r_pressed() {
+	if(current_button != "r"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("r");
+		click_count = 0;
+		current_button = "r";
+	updateDisplay();
+	}
+}
+
+function s_pressed() {
+	if(current_button != "s"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("s");
+		click_count = 0;
+		current_button = "s";
+	updateDisplay();
+	}
+}
+
+function t_pressed() {
+	if(current_button != "t"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("t");
+		click_count = 0;
+		current_button = "t";
+	updateDisplay();
+	}
+}
+
+function uvw_pressed() {
+	if(current_button != "uvw"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("u");
+		click_count += 1;
+		current_button = "uvw";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("v");
+		click_count += 1;
+		current_button = "uvw";
+	}
+	else if(click_count == 2){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("w");
+		click_count = 0;
+		current_button = "uvw";
+	}
+	updateDisplay();
+}
+
+function xyz_pressed() {
+	if(current_button != "xyz"){
+		click_count = 0;
+	}
+	if(click_count == 0){
+		output_str = output_str.concat("x");
+		click_count += 1;
+		current_button = "xyz";
+	}
+	else if(click_count == 1){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("y");
+		click_count += 1;
+		current_button = "xyz";
+	}
+	else if(click_count == 2){
+		output_str = output_str.slice(0,-1);
+		output_str = output_str.concat("z");
+		click_count = 0;
+		current_button = "xyz";
+	}
+	updateDisplay();
+}
+
+function space_pressed() {
+	output_str = output_str.concat(" ");
+	updateDisplay();
+}
+
+</script>
+
+
+</html>
+
+
+
